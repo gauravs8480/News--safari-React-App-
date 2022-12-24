@@ -2,17 +2,18 @@ import React, { Component } from "react";
 import Newsitem from "./Newsitem";
 import Loader from "./Loader";
 import PropTypes from 'prop-types';
+
 export class News extends Component {
   articles = [];
-  static defaultProps={
-    country:'in',
-    pageSize:10, 
-    category:'genral'
-   
+  static defaultProps = {
+    country: 'in',
+    pageSize: 10,
+    category: "genral"
+
   }
 
-PropTypes={
-    country:PropTypes.string,
+  PropTypes = {
+    country: PropTypes.string,
     category: PropTypes.string,
     pageSize: PropTypes.number,
   }
@@ -26,58 +27,44 @@ PropTypes={
     };
   }
 
-  async componentDidMount() {
-    let url =
-    `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=business&apiKey=157f8c0ac0b64905b657ae32a944bcef&page=1&pageSize=${this.props.pageSize}`;
+  async updateNews() {
+
+    const url =
+      `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=157f8c0ac0b64905b657ae32a944bcef&page=${this.state.page}&pageSize=${this.props.pageSize}`;
 
     let data = await fetch(url);
     let parseddata = await data.json();
 
     console.log(parseddata);
     this.setState({ articles: parseddata.articles });
+
+  }
+
+
+  async componentDidMount() {
+    this.updateNews();
   }
 
   handleNextClick = async () => {
-    console.log("Next");
-    if (!(this.state.page + 1 > Math.ceil(this.state.totalResults / this.props.pageSize)))
-     {
-   
-      let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=business&apiKey=157f8c0ac0b64905b657ae32a944bcef&page=${
-        this.state.page + 1
-      }&pageSize=${this.props.pageSize}`;
-      this.setState({loading: true})
-      let data = await fetch(url);
-      let parsedData = await data.json();
 
-      this.setState({
-        page: this.state.page + 1,
-        articles: parsedData.articles,
-        loading: false
-      });
-    }
+
+    this.setState({ page: this.state.page + 1 })
+    this.updateNews();
   }
 
   handlePrevClick = async () => {
-    console.log("Previous");
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=business&apiKey=157f8c0ac0b64905b657ae32a944bcef&page=${
-      this.state.page - 1
-    }&pageSize=${this.props.pageSize}`;
-    this.setState({loading: true})
-    let data = await fetch(url);
-    let parsedData = await data.json();
-    console.log(parsedData);
-    this.setState({
-      page: this.state.page - 1,
-      articles: parsedData.articles,
-       loading: false
-    });
+
+
+    this.setState({ page: this.state.page - 1 })
+    this.updateNews();
+
   };
 
   render() {
     return (
       <div className="container my-3">
-        <h1 className="text-center">News Safari</h1>
-    { this.state.loading&&<Loader/>} 
+        <h1 className="text-center" style={{ margin: "40px 0px;" }}>News Safari</h1>
+        {this.state.loading && <Loader />}
         <div className="row">
           {this.state.articles.map((element) => {
             return (
@@ -87,6 +74,9 @@ PropTypes={
                   description={element.description}
                   imageUrl={element.urlToImage}
                   newsurl={element.url}
+                  author={element.author}
+                  date={element.publishedAt}
+                  source={element.source.name}
                 />
               </div>
             );
